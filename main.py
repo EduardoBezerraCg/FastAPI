@@ -34,6 +34,7 @@ def find_post(id):
             return p
 
 #Root
+
 @app.get("/")
 def root():
     return {"data": "Welcome to our API!"}
