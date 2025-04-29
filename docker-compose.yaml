@@ -24,6 +24,8 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/fastapi
+    volumes:
+      - .:/app 
 
   pgadmin:
     image: dpage/pgadmin4
@@ -36,6 +38,9 @@ services:
       - "5050:80"
     depends_on:
       - db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
 
 volumes:
   postgres_data:
+  pgadmin_data:

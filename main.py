@@ -1,6 +1,6 @@
 from typing import Optional
 from fastapi.params import Body
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 import numpy as np
 from random import randrange
@@ -19,14 +19,24 @@ class Post(BaseModel):
     rating: Optional[int] = None
 
 my_posts = [{
-    "title": "title of post 1", 
-    "content": "content of post 1", 
+    "title": "Doooope Wekend", 
+    "content": "follow me for more", 
     "id": 1
     },
     {"title": "favorite foods", 
      "content": "I like pizza", 
      "id": 2
-    }]
+    },
+    {"title": "favorite drinks", 
+     "content": "I like coke", 
+     "id": 3
+    },{
+        "title": "favorite games", 
+        "content": "I like minecraft", 
+        "id": 4
+    }
+    
+    ]
 
 def find_post(id):
     for p in my_posts:
@@ -64,3 +74,19 @@ def create_post(post: Post):
     my_posts.append(post_dict)
     return {"data": post_dict}
 
+#Delete
+
+def find_index_post(id):
+    for i, p in enumerate(my_posts):
+        if p['id'] == id:
+            return i
+        
+
+@app.delete("/posts/makeDeletions/{id}",status_code=204)
+def delete_post(id:int):
+    index = find_index_post(id)
+    if index == None:
+        raise HTTPException(status_code=404, detail=f"post with id: {id} does not exist")
+    
+    my_posts.pop(index)
+    return {"data": 'post was deleted'}
