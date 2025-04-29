@@ -1,2 +1,5 @@
 fastapi[all]
 numpy
+sqlalchemy
+psycopg2-binary
+pydantic
