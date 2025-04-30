@@ -14,9 +14,11 @@ np.random.seed(42)
 
 class Post(BaseModel):
     title: str
-    bodyOfThePost: str
+    content: str
     published: bool = True
     rating: Optional[int] = None
+
+
 
 my_posts = [{
     "title": "Doooope Wekend", 
@@ -30,7 +32,8 @@ my_posts = [{
     {"title": "favorite drinks", 
      "content": "I like coke", 
      "id": 3
-    },{
+    },
+    {
         "title": "favorite games", 
         "content": "I like minecraft", 
         "id": 4
@@ -90,3 +93,17 @@ def delete_post(id:int):
     
     my_posts.pop(index)
     return {"data": 'post was deleted'}
+
+#UpdatePosts
+@app.put("/posts/makeUpdates/{id}")
+def update_post(id:int, post: Post):
+
+    index = find_index_post(id)
+    if index == None:
+        raise HTTPException(status_code=404, detail=f"post with id: {id} does not exist")
+    
+    post_dict = post.model_dump()
+    post_dict["id"] = id
+    my_posts[index] = post_dict
+
+    return {"data": "post was updated"}

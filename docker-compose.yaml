@@ -25,7 +25,7 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/fastapi
     volumes:
-      - .:/app 
+      - .:/app  # Hot reload ativado: mapeia sua máquina local para dentro do container
 
   pgadmin:
     image: dpage/pgadmin4
