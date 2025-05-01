@@ -7,7 +7,7 @@ from random import randrange
 from psycopg2.extras import RealDictCursor
 
 #from genSinteticData import generate_sintetic_data
-from app.db.database import makeQuery
+from app.db.database import makeQuery, makeQueryBySpecificValue
 
 
 
@@ -34,14 +34,15 @@ def root():
 #Get's
 @app.get("/posts")
 def get_posts():
-
-    return makeQuery("SELECT * FROM posts ORDER BY id;")
+    return makeQuery("""
+        SELECT * FROM posts ORDER BY id;
+    """)    
     
 
 #Get by ID
 @app.get("/posts/{id}")
 def get_post(id:int):
-    post = makeQuery(f"SELECT * FROM posts WHERE id = {id};")
+    post = makeQueryBySpecificValue(f"SELECT * FROM posts WHERE id = {id};")
 
     if not post:
         raise HTTPException(status_code=404, detail=f"post with id: {id} was not found")
@@ -55,8 +56,9 @@ def create_post(post: Post):
     my_posts.append(post_dict)
     return {"data": post_dict}
 
-#Delete
 
+
+#Delete
 def find_index_post(id):
     for i, p in enumerate(my_posts):
         if p['id'] == id:

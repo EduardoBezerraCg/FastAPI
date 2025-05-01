@@ -28,3 +28,20 @@ def makeQuery(query: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao acessar banco de dados: {e}")
+    
+def makeQueryBySpecificValue(query: str):
+    try:
+        with get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute(query)
+                results = cursor.fetchone()
+
+        if not results:
+            raise HTTPException(status_code=400, detail=f"No results for the query: {query}")
+        print(results)
+        return {"data": results}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao acessar banco de dados: {e}")
