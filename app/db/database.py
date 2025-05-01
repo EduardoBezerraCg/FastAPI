@@ -29,34 +29,35 @@ def makeQuery(query: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao acessar banco de dados: {e}")
     
-def makeQueryBySpecificValue(query: str):
+def makeQueryBySpecificValue(query: str, params: tuple = ()):
     try:
         with get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-                cursor.execute(query)
+                cursor.execute(query, params)
                 results = cursor.fetchone()
 
         if not results:
-            raise HTTPException(status_code=400, detail=f"No results for the query: {query}")
-        print(results)
+            raise HTTPException(status_code=404, detail="Post not found")
+
         return {"data": results}
 
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao acessar banco de dados: {e}")
+
     
-def makeWriteQuery(query: str):
+def makeWriteQuery(query: str, params: tuple = ()):
     try:
         with get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
-                cursor.execute(query)
-                results = cursor.rowcount
+                cursor.execute(query, params)
+                results = cursor.fetchone()
                 conn.commit()
 
         if not results:
-            raise HTTPException(status_code=400, detail=f"No results for the query: {query}")
-        print(results)
+            raise HTTPException(status_code=400, detail="Failed to modify the database, the result for the value does not exist")
+
         return {"data": results}
 
     except HTTPException:

@@ -2,6 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Instala o nano e outras dependências úteis
+RUN apt update && \
+    apt install -y nano && \
+    apt clean
+    
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 

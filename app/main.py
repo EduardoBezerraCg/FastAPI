@@ -39,49 +39,47 @@ def get_posts():
     """)    
     
 
-#Get by ID
+#Get post by ID
 @app.get("/posts/{id}")
-def get_post(id:int):
+def get_post(id: int):
+    post = makeQueryBySpecificValue("""
+                                    
+                                    SELECT * FROM posts WHERE id = %s;
 
-    post = makeQueryBySpecificValue(f"SELECT * FROM posts WHERE id = {id};")
+                                    """, (id,))
     return {"post_detail": post}
+
 
 
 #Post(create) a post
 @app.post("/posts")
 def create_post(post: Post):
-    create_post_query = makeWriteQuery(f"""
+    create_post_query = makeWriteQuery("""
         INSERT INTO posts (title, content, published)
-        VALUES ('{post.title}', '{post.content}', {post.published}) RETURNING *;
-    """)
+        VALUES (%s, %s, %s) RETURNING *; """,(post.title, post.content, post.published))    
+    
     return {"data": "post was created"}
 
 
-
 #Delete
-def find_index_post(id):
-    for i, p in enumerate(my_posts):
-        if p['id'] == id:
-            return i
-        
-
 @app.delete("/posts/makeDeletions/{id}",status_code=204)
 def delete_post(id:int):
-    postDelete = makeWriteQuery(f"DELETE FROM public.posts WHERE id = {id};")
+    postDelete = makeWriteQuery("DELETE FROM public.posts WHERE id = %s RETURNING *;", (id,))
 
-    return
+    return {"detail": "Post deleted"}
+
 
 
 #UpdatePosts
 @app.put("/posts/makeUpdates/{id}")
 def update_post(id:int, post: Post):
 
-    index = find_index_post(id)
-    if index == None:
-        raise HTTPException(status_code=404, detail=f"post with id: {id} does not exist")
-    
-    post_dict = post.model_dump()
-    post_dict["id"] = id
-    my_posts[index] = post_dict
+    create_post_query = makeWriteQuery(f"""
+                                       
+    UPDATE posts
+    SET title = '{post.title}', content = '{post.content}', published = {post.published}
+    WHERE id = {id} RETURNING *;
 
-    return {"data": "post was updated"}
+    """)
+     
+    return {"data": "PUT call was made"}
