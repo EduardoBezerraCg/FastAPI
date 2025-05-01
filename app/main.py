@@ -4,8 +4,11 @@ from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 import numpy as np
 from random import randrange
+from psycopg2.extras import RealDictCursor
 
-from genSinteticData import generate_sintetic_data
+#from genSinteticData import generate_sintetic_data
+from app.db.database import makeQuery
+
 
 
 
@@ -16,35 +19,10 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating: Optional[int] = None
-
-
-
-my_posts = [{
-    "title": "Doooope Wekend", 
-    "content": "follow me for more", 
-    "id": 1
-    },
-    {"title": "favorite foods", 
-     "content": "I like pizza", 
-     "id": 2
-    },
-    {"title": "favorite drinks", 
-     "content": "I like coke", 
-     "id": 3
-    },
-    {
-        "title": "favorite games", 
-        "content": "I like minecraft", 
-        "id": 4
-    }
     
-    ]
+    #rating: Optional[int] = None
 
-def find_post(id):
-    for p in my_posts:
-        if p["id"] == id:
-            return p
+my_posts = []
 
 #Root
 
@@ -56,15 +34,15 @@ def root():
 #Get's
 @app.get("/posts")
 def get_posts():
-    query = generate_sintetic_data()
-    #return {"random_numbers": query.tolist()}
-    return {"data": my_posts}
 
+    return makeQuery("SELECT * FROM posts ORDER BY id;")
+    
 
 #Get by ID
 @app.get("/posts/{id}")
 def get_post(id:int):
-    post = find_post(id)
+    post = makeQuery(f"SELECT * FROM posts WHERE id = {id};")
+
     if not post:
         raise HTTPException(status_code=404, detail=f"post with id: {id} was not found")
     return {"post_detail": post}
