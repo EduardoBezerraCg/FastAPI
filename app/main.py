@@ -7,7 +7,7 @@ from random import randrange
 from psycopg2.extras import RealDictCursor
 
 #from genSinteticData import generate_sintetic_data
-from app.db.database import makeQuery, makeQueryBySpecificValue
+from app.db.database import makeQuery, makeQueryBySpecificValue, makeWriteQuery
 
 
 
@@ -31,7 +31,7 @@ def root():
     return {"data": "Welcome to our API!"}
 
 
-#Get's
+#Get posts
 @app.get("/posts")
 def get_posts():
     return makeQuery("""
@@ -42,19 +42,19 @@ def get_posts():
 #Get by ID
 @app.get("/posts/{id}")
 def get_post(id:int):
-    post = makeQueryBySpecificValue(f"SELECT * FROM posts WHERE id = {id};")
 
-    if not post:
-        raise HTTPException(status_code=404, detail=f"post with id: {id} was not found")
+    post = makeQueryBySpecificValue(f"SELECT * FROM posts WHERE id = {id};")
     return {"post_detail": post}
 
-#Posts
+
+#Post(create) a post
 @app.post("/posts")
 def create_post(post: Post):
-    post_dict = post.model_dump()
-    post_dict["id"] = randrange(0, 1000000)
-    my_posts.append(post_dict)
-    return {"data": post_dict}
+    create_post_query = makeWriteQuery(f"""
+        INSERT INTO posts (title, content, published)
+        VALUES ('{post.title}', '{post.content}', {post.published}) RETURNING *;
+    """)
+    return {"data": "post was created"}
 
 
 
@@ -67,12 +67,10 @@ def find_index_post(id):
 
 @app.delete("/posts/makeDeletions/{id}",status_code=204)
 def delete_post(id:int):
-    index = find_index_post(id)
-    if index == None:
-        raise HTTPException(status_code=404, detail=f"post with id: {id} does not exist")
-    
-    my_posts.pop(index)
-    return {"data": 'post was deleted'}
+    postDelete = makeWriteQuery(f"DELETE FROM public.posts WHERE id = {id};")
+
+    return
+
 
 #UpdatePosts
 @app.put("/posts/makeUpdates/{id}")
