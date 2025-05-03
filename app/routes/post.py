@@ -23,7 +23,7 @@ def get_posts():
     
 
 #Get post by ID
-@router.get("//{id}")
+@router.get("/{id}")
 def get_post(id: int):
     post = makeQueryBySpecificValue("""
                                     
@@ -45,7 +45,7 @@ def create_post(post: schemas.PostCreate):
 
 
 #Delete
-@router.delete("//makeDeletions/{id}",status_code=204)
+@router.delete("/makeDeletions/{id}",status_code=204)
 def delete_post(id:int):
     postDelete = makeWriteQuery("DELETE FROM public.posts WHERE id = %s RETURNING *;", (id,))
 
@@ -54,7 +54,7 @@ def delete_post(id:int):
 
 
 #UpdatePosts
-@router.put("//makeUpdates/{id}")
+@router.put("/makeUpdates/{id}")
 def update_post(id:int, post: schemas.PostCreate):
 
     update_query = """
