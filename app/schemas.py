@@ -1,7 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import List
 
+
+##########################   Social Media Post part    #######################################
 class Post(BaseModel):
     title: str
     content: str
@@ -20,5 +22,19 @@ class PostResponse(PostBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
+
+##########################   User part    #######################################
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    is_active: bool 
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
