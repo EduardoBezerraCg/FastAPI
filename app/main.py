@@ -5,24 +5,17 @@ from pydantic import BaseModel
 import numpy as np
 from random import randrange
 from psycopg2.extras import RealDictCursor
+from typing import List
 
 #from genSinteticData import generate_sintetic_data
 from app.db.database import makeQuery, makeQueryBySpecificValue, makeWriteQuery
-
+from . import schemas
 
 
 
 app = FastAPI()
 np.random.seed(42)
 
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
-    
-    #rating: Optional[int] = None
-
-my_posts = []
 
 #Root
 
@@ -32,7 +25,7 @@ def root():
 
 
 #Get posts
-@app.get("/posts")
+@app.get("/posts", response_model=List[schemas.PostResponse])
 def get_posts():
     return makeQuery("""
         SELECT * FROM posts ORDER BY id;
@@ -52,13 +45,13 @@ def get_post(id: int):
 
 
 #Post(create) a post
-@app.post("/posts")
-def create_post(post: Post):
+@app.post("/posts", response_model=schemas.PostResponse)
+def create_post(post: schemas.PostCreate):
     create_post_query = makeWriteQuery("""
         INSERT INTO posts (title, content, published)
         VALUES (%s, %s, %s) RETURNING *; """,(post.title, post.content, post.published))    
     
-    return {"data": "post was created"}
+    return create_post_query
 
 
 #Delete
@@ -72,7 +65,7 @@ def delete_post(id:int):
 
 #UpdatePosts
 @app.put("/posts/makeUpdates/{id}")
-def update_post(id:int, post: Post):
+def update_post(id:int, post: schemas.PostCreate):
 
     update_query = """
     UPDATE posts

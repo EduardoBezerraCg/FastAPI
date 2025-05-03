@@ -22,7 +22,7 @@ def makeQuery(query: str):
         if not results:
             raise HTTPException(status_code=400, detail=f"No results for the query: {query}")
         
-        return {"data": results}
+        return results
 
     except HTTPException:
         raise
@@ -39,7 +39,7 @@ def makeQueryBySpecificValue(query: str, params: tuple = ()):
         if not results:
             raise HTTPException(status_code=404, detail="Post not found")
 
-        return {"data": results}
+        return results
 
     except HTTPException:
         raise
@@ -58,7 +58,7 @@ def makeWriteQuery(query: str, params: tuple = ()):
         if not results:
             raise HTTPException(status_code=400, detail="Write action for the specific value is not allowed, make sure that this value exists")
 
-        return {"data": results}
+        return results
 
     except HTTPException:
         raise
