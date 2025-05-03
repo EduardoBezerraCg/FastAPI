@@ -1,26 +1,21 @@
-from typing import Optional
-from fastapi.params import Body
-from fastapi import FastAPI, HTTPException, status, APIRouter
-from pydantic import BaseModel
-import numpy as np
-from random import randrange
-from psycopg2.extras import RealDictCursor
+
+from fastapi import status, APIRouter
+
 from typing import List
 
-#from genSinteticData import generate_sintetic_data
-from app.utils import hash
 from app.db.database import makeQuery, makeQueryBySpecificValue, makeWriteQuery
 from .. import schemas
 
-#SQL Alchemy part
-from app.db import models
-from app.db.databaseSQLAlchemy import engine
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/posts",
+    tags=["Social media posts"],
+    responses={404: {"description": "Not found"}}
+)
 
 ############################       Posts part        ######################################
 #Get posts
-@router.get("/posts", status_code=status.HTTP_200_OK,response_model=List[schemas.PostResponse])
+@router.get("/", status_code=status.HTTP_200_OK,response_model=List[schemas.PostResponse])
 def get_posts():
     return makeQuery("""
         SELECT * FROM posts ORDER BY id;
@@ -28,7 +23,7 @@ def get_posts():
     
 
 #Get post by ID
-@router.get("/posts/{id}")
+@router.get("//{id}")
 def get_post(id: int):
     post = makeQueryBySpecificValue("""
                                     
@@ -40,7 +35,7 @@ def get_post(id: int):
 
 
 #Post(create) a post
-@router.post("/posts", response_model=schemas.PostResponse)
+@router.post("/", response_model=schemas.PostResponse)
 def create_post(post: schemas.PostCreate):
     create_post_query = makeWriteQuery("""
         INSERT INTO posts (title, content, published)
@@ -50,7 +45,7 @@ def create_post(post: schemas.PostCreate):
 
 
 #Delete
-@router.delete("/posts/makeDeletions/{id}",status_code=204)
+@router.delete("//makeDeletions/{id}",status_code=204)
 def delete_post(id:int):
     postDelete = makeWriteQuery("DELETE FROM public.posts WHERE id = %s RETURNING *;", (id,))
 
@@ -59,7 +54,7 @@ def delete_post(id:int):
 
 
 #UpdatePosts
-@router.put("/posts/makeUpdates/{id}")
+@router.put("//makeUpdates/{id}")
 def update_post(id:int, post: schemas.PostCreate):
 
     update_query = """

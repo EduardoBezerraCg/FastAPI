@@ -1,13 +1,12 @@
-from typing import Optional
-from fastapi.params import Body
-from fastapi import FastAPI, HTTPException, status, APIRouter
-from pydantic import BaseModel
-import numpy as np
-from random import randrange
-from psycopg2.extras import RealDictCursor
+from fastapi import status, APIRouter
+
 from typing import List
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/users",
+    tags=["Users Section/Properties"],
+    responses={404: {"description": "Not found"}}
+)
 
 #from genSinteticData import generate_sintetic_data
 from app.utils import hash
@@ -20,13 +19,13 @@ from app.db.databaseSQLAlchemy import engine
 
 ############################       Users part        ######################################
 
-@router.get("/users", status_code=status.HTTP_200_OK, response_model=List[schemas.UserOut])
+@router.get("/", status_code=status.HTTP_200_OK, response_model=List[schemas.UserOut])
 def get_users():
     return makeQuery("""
         SELECT * FROM users ORDER BY id;
     """) 
 
-@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
 def create_user(user: schemas.UserCreate):
     #Hash the password
     hashed_password = hash(user.password)
@@ -38,11 +37,9 @@ def create_user(user: schemas.UserCreate):
     return new_user
 
 
-@router.get("/users/specificUser/{id}", status_code=status.HTTP_200_OK, response_model=schemas.UserOut)
+@router.get("/specificUser/{id}", status_code=status.HTTP_200_OK, response_model=schemas.UserOut)
 def get_user(id: int):
-    user = makeQueryBySpecificValue("""
-                                    
-                                    SELECT * FROM users WHERE id = %s;
-
-                                    """, (id,))
+    user = makeQueryBySpecificValue(""" 
+            SELECT * FROM users WHERE id = %s;
+            """, (id,))
     return user
