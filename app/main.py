@@ -74,12 +74,13 @@ def delete_post(id:int):
 @app.put("/posts/makeUpdates/{id}")
 def update_post(id:int, post: Post):
 
-    create_post_query = makeWriteQuery(f"""
-                                       
+    update_query = """
     UPDATE posts
-    SET title = '{post.title}', content = '{post.content}', published = {post.published}
-    WHERE id = {id} RETURNING *;
+    SET title = %s, content = %s, published = %s
+    WHERE id = %s
+    RETURNING *;
+"""
 
-    """)
-     
-    return {"data": "PUT call was made"}
+    updated_post = makeWriteQuery(update_query, (post.title, post.content, post.published, id))
+
+    return updated_post

@@ -56,7 +56,7 @@ def makeWriteQuery(query: str, params: tuple = ()):
                 conn.commit()
 
         if not results:
-            raise HTTPException(status_code=400, detail="Failed to modify the database, the result for the value does not exist")
+            raise HTTPException(status_code=400, detail="Write action for the specific value is not allowed, make sure that this value exists")
 
         return {"data": results}
 
