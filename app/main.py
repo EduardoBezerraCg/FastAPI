@@ -8,6 +8,7 @@ from psycopg2.extras import RealDictCursor
 from typing import List
 
 #from genSinteticData import generate_sintetic_data
+from app.utils import hash
 from app.db.database import makeQuery, makeQueryBySpecificValue, makeWriteQuery
 from . import schemas
 
@@ -15,6 +16,7 @@ from . import schemas
 from app.db import models
 from app.db.databaseSQLAlchemy import engine
 models.Base.metadata.create_all(bind=engine)
+
 
 
 app = FastAPI()
@@ -93,6 +95,10 @@ def get_users():
 
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
 def create_user(user: schemas.UserCreate):
+    #Hash the password
+    hashed_password = hash(user.password)
+    user.password = hashed_password
+
     new_user = makeWriteQuery("""
         INSERT INTO users (email, password)
         VALUES (%s, %s) RETURNING *; """,(user.email, user.password))  
