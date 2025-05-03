@@ -37,7 +37,7 @@ def makeQueryBySpecificValue(query: str, params: tuple = ()):
                 results = cursor.fetchone()
 
         if not results:
-            raise HTTPException(status_code=404, detail="Post not found")
+            raise HTTPException(status_code=404, detail="No results for the specific value, make sure that this value exists")
 
         return results
 
