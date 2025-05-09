@@ -49,21 +49,35 @@ def create_post(
     create_post_query = makeWriteQuery("""
         INSERT INTO posts (title, content, published, owner_id)
         VALUES (%s, %s, %s,%s) RETURNING *;
-    """, (post.title, post.content, post.published, current_user["id"]))  
-
-    #Debug  
+    """, (post.title, post.content, post.published, current_user["id"]))    
     print("Requested by:", current_user["email"])
     return create_post_query
 
 
 #Delete
-@router.delete("/makeDeletions/{id}",status_code=204)
-def delete_post(id:int, current_user: dict = Depends(oauth2.get_current_user)):
-    postDelete = makeWriteQuery("DELETE FROM public.posts WHERE id = %s RETURNING *;", (id,))
+@router.delete("/makeDeletions/{id}", status_code=200)
+def delete_post(id: int, current_user: dict = Depends(oauth2.get_current_user)):
+    # Step 1: Get the post to check ownership
+    post = makeQueryBySpecificValue("SELECT * FROM public.posts WHERE id = %s;", (id,))
+    
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
 
-    if postDelete != current_user["id"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform requested action")
-    return {"detail": "Post deleted"}
+    # If your query returns a list, get the first row
+    post = post[0] if isinstance(post, list) else post
+
+    # Step 2: Check if current user is the owner
+    if int(post["owner_id"]) != int(current_user["id"]):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform requested action, this is not your post"
+        )
+
+    # Step 3: Delete the post
+    deleted = makeWriteQuery("DELETE FROM public.posts WHERE id = %s RETURNING *;", (id,))
+    
+    return {"detail": "Post deleted", "deleted_post": deleted}
+
 
 
 
