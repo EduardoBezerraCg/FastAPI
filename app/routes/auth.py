@@ -12,7 +12,7 @@ router = APIRouter(
 
 #get userfunction
 @router.get("/login/getUserDetails/{email}")
-def get_user(email: str):
+def get_user(email: str, current_user: dict = Depends(oauth2.get_current_user)):
     # Normalize the email (remove spaces, lowercase it)
     normalized_email = email.strip().lower()
 
@@ -25,7 +25,7 @@ def get_user(email: str):
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    return {"user": user}
+    return {"userDetails": f"The email {normalized_email}, is a valid user"}
 
 
 @router.post("/login", response_model=schemas.Token)
