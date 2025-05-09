@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from app.db.database import makeQuery, makeQueryBySpecificValue, makeWriteQuery
-from .. import schemas, utils
+from .. import oauth2, schemas, utils
 
 
 router = APIRouter(
     prefix="/oath2",
-    tags=["Users Section/Properties"],
+    tags=["Authentication"],
     responses={404: {"description": "Not found"}}
 )
 
@@ -27,9 +28,10 @@ def get_user(email: str):
     return {"user": user}
 
 
-@router.post("/login")
-def login(user_credentials: schemas.UserLogin):
-    email = user_credentials.email.strip().lower()
+@router.post("/login", response_model=schemas.Token)
+def login(user_credentials: OAuth2PasswordRequestForm = Depends()):
+
+    email = user_credentials.username.strip().lower()
 
     user = makeQueryBySpecificValue("""
         SELECT * 
@@ -40,9 +42,12 @@ def login(user_credentials: schemas.UserLogin):
     print("Usuário do banco:", user)
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Credentials")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials")
     
     if not utils.verify(user_credentials.password, user["password"]):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid Credentials")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid Credentials")
 
-    return {"token": "Example token"}
+    access_token = oauth2.create_access_token(data={"user_id": user["id"]})
+
+    return {"access_token": access_token, "token_type": "bearer"}
+

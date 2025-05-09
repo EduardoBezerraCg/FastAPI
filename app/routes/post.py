@@ -4,7 +4,8 @@ from fastapi import status, APIRouter
 from typing import List
 
 from app.db.database import makeQuery, makeQueryBySpecificValue, makeWriteQuery
-from .. import schemas
+from .. import schemas, oauth2
+from fastapi import Depends
 
 
 router = APIRouter(
@@ -16,15 +17,15 @@ router = APIRouter(
 ############################       Posts part        ######################################
 #Get posts
 @router.get("/", status_code=status.HTTP_200_OK,response_model=List[schemas.PostResponse])
-def get_posts():
+def get_posts(current_user: dict = Depends(oauth2.get_current_user)):
     return makeQuery("""
         SELECT * FROM posts ORDER BY id;
     """)    
     
 
 #Get post by ID
-@router.get("/{id}")
-def get_post(id: int):
+@router.get("/{id}", status_code=status.HTTP_200_OK)
+def get_post(id: int, current_user: dict = Depends(oauth2.get_current_user)):
     post = makeQueryBySpecificValue("""
                                     
                                     SELECT * FROM posts WHERE id = %s;
@@ -34,12 +35,17 @@ def get_post(id: int):
 
 
 
+
 #Post(create) a post
-@router.post("/", response_model=schemas.PostResponse)
-def create_post(post: schemas.PostCreate):
+@router.post("/create", response_model=schemas.PostResponse)
+def create_post(
+    post: schemas.PostCreate,
+    current_user: dict = Depends(oauth2.get_current_user)  # Só para autenticação!
+):
     create_post_query = makeWriteQuery("""
         INSERT INTO posts (title, content, published)
-        VALUES (%s, %s, %s) RETURNING *; """,(post.title, post.content, post.published))    
+        VALUES (%s, %s, %s) RETURNING *;
+    """, (post.title, post.content, post.published))    
     
     return create_post_query
 
