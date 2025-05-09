@@ -4,8 +4,9 @@ from fastapi import status, APIRouter, HTTPException
 from typing import List
 
 from app.db.database import makeQuery, makeQueryBySpecificValue, makeWriteQuery
-from .. import schemas, oauth2
+from .. import schemas, oauth2, utils
 from fastapi import Depends
+from app.db.database import makeQuery, makeQueryBySpecificValue, makeWriteQuery, validate_post_ownership
 
 
 router = APIRouter(
@@ -57,41 +58,28 @@ def create_post(
 #Delete
 @router.delete("/makeDeletions/{id}", status_code=200)
 def delete_post(id: int, current_user: dict = Depends(oauth2.get_current_user)):
-    # Step 1: Get the post to check ownership
-    post = makeQueryBySpecificValue("SELECT * FROM public.posts WHERE id = %s;", (id,))
-    
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
-
-    # If your query returns a list, get the first row
-    post = post[0] if isinstance(post, list) else post
-
-    # Step 2: Check if current user is the owner
-    if int(post["owner_id"]) != int(current_user["id"]):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to perform requested action, this is not your post"
-        )
+    validate_post_ownership(id, current_user["id"])
 
     # Step 3: Delete the post
-    deleted = makeWriteQuery("DELETE FROM public.posts WHERE id = %s RETURNING *;", (id,))
+    deleted = makeWriteQuery("""DELETE FROM public.posts WHERE id = %s RETURNING *;""", (id,))
     
-    return {"detail": "Post deleted", "deleted_post": deleted}
+    return {"Action": "Post deleted", "deleted_post": deleted}
 
 
 
 
 #UpdatePosts
 @router.put("/makeUpdates/{id}")
-def update_post(id:int, post: schemas.PostCreate, current_user: dict = Depends(oauth2.get_current_user)):
+def update_post(id: int, post: schemas.PostCreate, current_user: dict = Depends(oauth2.get_current_user)):
+    validate_post_ownership(id, current_user["id"])
 
+    # Step 3: Update the post
     update_query = """
-    UPDATE posts
-    SET title = %s, content = %s, published = %s
-    WHERE id = %s
-    RETURNING *;
-"""
-
+        UPDATE posts
+        SET title = %s, content = %s, published = %s
+        WHERE id = %s
+        RETURNING *;
+    """
     updated_post = makeWriteQuery(update_query, (post.title, post.content, post.published, id))
 
     return updated_post

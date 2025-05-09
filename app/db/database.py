@@ -64,3 +64,17 @@ def makeWriteQuery(query: str, params: tuple = ()):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao acessar banco de dados: {e}")
+
+
+def validate_post_ownership(post_id: int, current_user_id: int):
+    post = makeQueryBySpecificValue("SELECT * FROM public.posts WHERE id = %s;", (post_id,))
+
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    post = post[0] if isinstance(post, list) else post
+
+    if int(post["owner_id"]) != int(current_user_id):
+        raise HTTPException(status_code=403, detail="Not authorized to access this post")
+
+    return post
