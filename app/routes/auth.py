@@ -5,7 +5,7 @@ from .. import oauth2, schemas, utils
 
 
 router = APIRouter(
-    prefix="/oath2",
+    prefix="/oauth2",
     tags=["Authentication"],
     responses={404: {"description": "Not found"}}
 )

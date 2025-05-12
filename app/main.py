@@ -2,6 +2,7 @@
 from fastapi import FastAPI, status
 from app.db.database import makeQuery, makeQueryBySpecificValue, makeWriteQuery
 
+#Teste123
 
 #SQL Alchemy part
 from app.db import models
