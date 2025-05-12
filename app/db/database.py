@@ -75,6 +75,6 @@ def validate_post_ownership(post_id: int, current_user_id: int):
     post = post[0] if isinstance(post, list) else post
 
     if int(post["owner_id"]) != int(current_user_id):
-        raise HTTPException(status_code=403, detail="Not authorized to access this post")
+        raise HTTPException(status_code=403, detail="Not authorized to access this post, make sure that you are the owner")
 
     return post
