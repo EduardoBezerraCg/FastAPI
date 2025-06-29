@@ -15,3 +15,4 @@ If your project includes authentication (e.g., OAuth2 or JWT):
 2. Click **Authorize** at the top-right.
 3. Input your token (e.g., `Bearer <your_token>` or basic credentials).
 4. Now you can try secured endpoints directly in Swagger.
+

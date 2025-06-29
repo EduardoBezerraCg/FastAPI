@@ -1,5 +1,7 @@
 version: "3.9"
 
+# env_file:
+#   - ProjectCred.env  # 👈 Será carregado por padrão para todos os serviços
 services:
   db:
     image: postgres:15
@@ -20,6 +22,8 @@ services:
     restart: always
     depends_on:
       - db
+    env_file:
+      - ProjectCred.env # 👈 Load the .env file into the container
     ports:
       - "8000:8000"
     environment:
@@ -40,6 +44,12 @@ services:
       - db
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
 
 volumes:
   postgres_data:
