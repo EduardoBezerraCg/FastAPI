@@ -12,3 +12,4 @@ class User(Base):
     password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
+    role = Column(String, nullable=False)
