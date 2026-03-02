@@ -1,15 +1,16 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
-import os
-from fastapi import FastAPI, HTTPException, status
+from fastapi import HTTPException
+
+from app.core.config import settings
 
 def get_connection():
     return psycopg2.connect(
-        host=os.getenv("DB_HOST", "db"),
-        database=os.getenv("POSTGRES_DB", "fastapi"),
-        user=os.getenv("POSTGRES_USER", "postgres"),
-        password=os.getenv("POSTGRES_PASSWORD", "postgres"),
-        port=os.getenv("DB_PORT", 5432)
+        host=settings.db_host,
+        database=settings.postgres_db,
+        user=settings.postgres_user,
+        password=settings.postgres_password,
+        port=settings.db_port,
     )
 
 def makeQuery(query: str):

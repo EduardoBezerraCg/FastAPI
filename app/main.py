@@ -1,6 +1,6 @@
 
-from fastapi import FastAPI, status
-from app.db.database import makeQuery, makeQueryBySpecificValue, makeWriteQuery
+from fastapi import FastAPI
+from app.core.config import settings
 
 #SQL Alchemy part
 from app.db import models
@@ -8,7 +8,7 @@ from app.db.databaseSQLAlchemy import engine
 models.Base.metadata.create_all(bind=engine)
 
 
-app = FastAPI()
+app = FastAPI(title=settings.app_name, version=settings.app_version)
 
 #importing the routers
 from app.routes.user import router as user_router
