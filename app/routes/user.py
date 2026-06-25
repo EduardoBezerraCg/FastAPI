@@ -6,6 +6,7 @@ from app.utils import hash
 from app.db.database import makeQuery, makeQueryBySpecificValue, makeWriteQuery
 from .. import schemas
 from .. import oauth2
+from app.core.config import settings
 
 # cache redis
 from redis.asyncio import Redis
@@ -17,7 +18,12 @@ router = APIRouter(
 )
 
 # Update this to your container name if running in Docker
-redis_client = Redis(host="redis", port=6379, db=0, decode_responses=True)
+redis_client = Redis(
+    host=settings.redis_host,
+    port=settings.redis_port,
+    db=settings.redis_db,
+    decode_responses=True,
+)
 
 # Cache configuration
 CACHE_TTL = 300  # 5 minutes

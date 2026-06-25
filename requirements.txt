@@ -1,8 +1,10 @@
-fastapi[all]
+fastapi[standard]
+uvicorn[standard]
 numpy
 sqlalchemy
 psycopg2-binary
 pydantic
+pydantic-settings
 passlib
 python-jose[cryptography]
 python-dotenv

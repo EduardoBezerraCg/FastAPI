@@ -1,16 +1,14 @@
 version: "3.9"
 
-# env_file:
-#   - ProjectCred.env  # 👈 Será carregado por padrão para todos os serviços
 services:
   db:
     image: postgres:15
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: fastapi
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -22,22 +20,21 @@ services:
     restart: always
     depends_on:
       - db
+      - redis
     env_file:
-      - ProjectCred.env # 👈 Load the .env file into the container
+      - .env
     ports:
       - "8000:8000"
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/fastapi
     volumes:
-      - .:/app  # Hot reload ativado: mapeia sua máquina local para dentro do container
+      - .:/app
 
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin_container
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
       - "5050:80"
     depends_on:
